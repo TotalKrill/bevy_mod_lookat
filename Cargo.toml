@@ -5,6 +5,7 @@ edition = "2021"
 description = "A microplugin for Bevy, that allows adding a component to an entity, that makes it target either an entity, or a position"
 author = "Kristoffer Ödmark <kristoffer.odmark90@gmail.com>"
 license = "MIT"
+readme = "README.md"
 
 [dependencies]
 bevy = {version = "0.14.1", default-features = false}
