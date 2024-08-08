@@ -30,7 +30,7 @@ pub struct RotateTowardsPlugin;
 
 impl Plugin for RotateTowardsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostUpdate, rotate_towards.after(propagate_transforms));
+        app.add_systems(PostUpdate, rotate_towards.before(propagate_transforms));
     }
 }
 
