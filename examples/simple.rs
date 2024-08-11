@@ -74,14 +74,14 @@ fn setup(
     let target_id = commands
         .spawn((
             PbrBundle {
-                mesh: meshes.add(Cuboid::new(0.2, 0.2, 0.2)),
+                mesh: meshes.add(Cuboid::new(0.05, 0.05, 0.05)),
                 material: materials.add(Color::from(DARK_RED)),
                 transform: Transform::from_xyz(1.0, 0.5, 1.0),
                 ..default()
             },
             Move,
             Rotate,
-            ShowAxes,
+            // ShowAxes,
         ))
         .id();
 

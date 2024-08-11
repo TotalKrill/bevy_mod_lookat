@@ -30,25 +30,41 @@ pub struct RotateTowardsPlugin;
 
 impl Plugin for RotateTowardsPlugin {
     fn build(&self, app: &mut App) {
+        app.init_resource::<Rotations>();
         app.add_systems(
             PostUpdate,
-            rotate_towards.before(TransformSystem::TransformPropagate),
+            (rotate_towards, apply_rotations)
+                .before(TransformSystem::TransformPropagate)
+                .chain(),
         );
     }
 }
+#[derive(Resource, Default)]
+struct Rotations(pub Vec<(Entity, Quat)>);
 
 fn rotate_towards(
-    global_transforms: Query<&GlobalTransform>, // potential_targets
-    mut rotators: Query<(&mut Transform, &GlobalTransform, Option<&Parent>, &RotateTo)>, // the ones to rotate
+    mut rotations: ResMut<Rotations>,
+    transhelp: TransformHelper,
+    calculation_query: Query<(Entity, Option<&Parent>, &RotateTo)>, // the ones to rotate
 ) {
-    for (mut rotator_t, rotator_gt, parent, target) in rotators.iter_mut() {
-        let Ok(target_gt) = global_transforms.get(target.entity) else {
+    // store the rotations
+    rotations.0.clear();
+    for (rotator_entity, parent, target) in calculation_query.iter() {
+        // let transhelp = transform_params.p0();
+        let Ok(target_gt) = transhelp.compute_global_transform(target.entity) else {
             bevy::log::error!("Entity used as target was not found: {}", target.entity);
+            continue;
+        };
+        let Ok(rotator_gt) = transhelp.compute_global_transform(rotator_entity) else {
+            bevy::log::error!(
+                "Failed to calculate global transform for {}",
+                rotator_entity
+            );
             continue;
         };
 
         let parent_gt = if let Some(parent_e) = parent {
-            global_transforms.get(parent_e.get()).ok()
+            transhelp.compute_global_transform(parent_e.get()).ok()
         } else {
             None
         };
@@ -66,9 +82,22 @@ fn rotate_towards(
             }
         };
 
-        let rotation = calculate_local_rotation_to_target(rotator_gt, target_gt, parent_gt, updir);
+        let rotation =
+            calculate_local_rotation_to_target(&rotator_gt, &target_gt, parent_gt, updir);
 
-        rotator_t.rotation = rotation;
+        rotations.0.push((rotator_entity, rotation));
+    }
+}
+
+fn apply_rotations(
+    rotations: Res<Rotations>,
+    // put another modification query, and use this to apply the transformations calculated
+    mut modification: Query<&mut Transform, With<RotateTo>>,
+) {
+    for (entity, newrot) in rotations.0.iter() {
+        if let Ok(mut rotator_t) = modification.get_mut(*entity) {
+            rotator_t.rotation = *newrot;
+        }
     }
 }
 
@@ -76,7 +105,7 @@ fn rotate_towards(
 pub fn calculate_local_rotation_to_target(
     rotator_gt: &GlobalTransform,
     target_gt: &GlobalTransform,
-    parent_gt: Option<&GlobalTransform>,
+    parent_gt: Option<GlobalTransform>,
     updir: Dir3,
 ) -> Quat {
     let target_gt_computed = target_gt.compute_transform();
