@@ -1,4 +1,4 @@
-use bevy::{prelude::*, transform::systems::propagate_transforms};
+use bevy::prelude::*;
 
 #[derive(Component)]
 /// When this component is added on an entity, [`Transform::forward()`] direction points towards the selected
@@ -30,7 +30,10 @@ pub struct RotateTowardsPlugin;
 
 impl Plugin for RotateTowardsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostUpdate, rotate_towards.before(propagate_transforms));
+        app.add_systems(
+            PostUpdate,
+            rotate_towards.before(TransformSystem::TransformPropagate),
+        );
     }
 }
 
