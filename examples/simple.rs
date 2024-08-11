@@ -1,5 +1,6 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
-
+#![feature(test)]
+extern crate test;
 use bevy::{color::palettes::css::*, prelude::*, render::primitives::Aabb};
 use bevy_mod_lookat::*;
 
@@ -138,4 +139,75 @@ fn setup(
         transform: Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use test::bench::Bencher;
+
+    #[bench]
+    fn bench(b: &mut Bencher) {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins);
+        let mut commands = app.world_mut().commands();
+        // circular base
+        commands.spawn(SpatialBundle {
+            transform: Transform::from_rotation(Quat::from_rotation_x(
+                -std::f32::consts::FRAC_PI_2,
+            )),
+            ..default()
+        });
+        let target_id = commands
+            .spawn((
+                SpatialBundle {
+                    transform: Transform::from_xyz(1.0, 0.5, 1.0),
+                    ..default()
+                },
+                Move,
+                Rotate,
+            ))
+            .id();
+
+        // cube
+        commands
+            .spawn((SpatialBundle {
+                transform: Transform::from_xyz(3.5, 0.5, 0.0),
+                ..default()
+            },))
+            .with_children(|commands| {
+                commands
+                    .spawn((
+                        Rotate,
+                        SpatialBundle {
+                            transform: Transform::from_xyz(0.0, 0.5, 0.0),
+                            ..default()
+                        },
+                    ))
+                    .with_children(|parent| {
+                        parent.spawn((
+                            SpatialBundle {
+                                transform: Transform::from_xyz(0.0, 0.7, 0.0),
+                                ..default()
+                            },
+                            RotateTo {
+                                entity: target_id,
+                                // this choses what the flat side should be in relation towards
+                                updir: UpDirection::Parent,
+                            },
+                            ShowForward,
+                        ));
+                    });
+            });
+
+        app.add_plugins(RotateTowardsPlugin)
+            .add_systems(Update, (mover, rotate));
+
+        // move past the Startup state
+        app.update();
+
+        b.iter(|| {
+            app.update();
+        });
+    }
 }
