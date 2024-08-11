@@ -90,7 +90,7 @@ fn setup(
             PbrBundle {
                 mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
                 material: materials.add(Color::srgb_u8(124, 144, 255)),
-                transform: Transform::from_xyz(2.0, 0.5, 0.0),
+                transform: Transform::from_xyz(3.5, 0.5, 0.0),
                 ..default()
             },
             ShowAxes,
