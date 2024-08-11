@@ -158,53 +158,58 @@ mod tests {
             )),
             ..default()
         });
-        let target_id = commands
-            .spawn((
-                SpatialBundle {
-                    transform: Transform::from_xyz(1.0, 0.5, 1.0),
-                    ..default()
-                },
-                Move,
-                Rotate,
-            ))
-            .id();
 
-        // cube
-        commands
-            .spawn((SpatialBundle {
-                transform: Transform::from_xyz(3.5, 0.5, 0.0),
-                ..default()
-            },))
-            .with_children(|commands| {
-                commands
-                    .spawn((
-                        Rotate,
-                        SpatialBundle {
-                            transform: Transform::from_xyz(0.0, 0.5, 0.0),
-                            ..default()
-                        },
-                    ))
-                    .with_children(|parent| {
-                        parent.spawn((
+        for i in 0..100 {
+            let target_id = commands
+                .spawn((
+                    SpatialBundle {
+                        transform: Transform::from_xyz(i as f32 * 1.0, 0.5, 1.0),
+                        ..default()
+                    },
+                    Move,
+                    Rotate,
+                ))
+                .id();
+
+            // cube
+            commands
+                .spawn((SpatialBundle {
+                    transform: Transform::from_xyz(3.5, 0.5, i as f32 * 1.0),
+                    ..default()
+                },))
+                .with_children(|commands| {
+                    commands
+                        .spawn((
+                            Rotate,
                             SpatialBundle {
-                                transform: Transform::from_xyz(0.0, 0.7, 0.0),
+                                transform: Transform::from_xyz(0.0, i as f32 * 0.5, 0.0),
                                 ..default()
                             },
-                            RotateTo {
-                                entity: target_id,
-                                // this choses what the flat side should be in relation towards
-                                updir: UpDirection::Parent,
-                            },
-                            ShowForward,
-                        ));
-                    });
-            });
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn((
+                                SpatialBundle {
+                                    transform: Transform::from_xyz(0.0, i as f32 * 0.7, 0.0),
+                                    ..default()
+                                },
+                                RotateTo {
+                                    entity: target_id,
+                                    // this choses what the flat side should be in relation towards
+                                    updir: UpDirection::Parent,
+                                },
+                                ShowForward,
+                            ));
+                        });
+                });
+        }
 
         app.add_plugins(RotateTowardsPlugin)
             .add_systems(Update, (mover, rotate));
 
         // move past the Startup state
-        app.update();
+        for i in 0..20 {
+            app.update();
+        }
 
         b.iter(|| {
             app.update();
