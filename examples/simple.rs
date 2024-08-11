@@ -53,8 +53,8 @@ fn rotate(mut query: Query<&mut Transform, With<Rotate>>, time: Res<Time>) {
 fn mover(time: Res<Time>, mut ents: Query<&mut Transform, With<Move>>) {
     let distance = 2.0;
     for mut ent in ents.iter_mut() {
-        ent.translation.x = distance * f32::sin(time.elapsed().as_secs_f32());
-        ent.translation.z = distance * f32::cos(time.elapsed().as_secs_f32());
+        ent.translation.x = distance * f32::sin(2. * time.elapsed().as_secs_f32());
+        ent.translation.z = distance * f32::cos(2. * time.elapsed().as_secs_f32());
         ent.translation.y = 1.5 + 0.5 * distance * f32::cos(3.0 * time.elapsed().as_secs_f32());
     }
 }
