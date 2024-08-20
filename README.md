@@ -6,7 +6,7 @@ A microplugin and library for bevy to rotate an entity towards a target through 
 [![Documentation](https://docs.rs/bevy_ui_anchor/badge.svg)](https://docs.rs/bevy_ui_anchor)
 [![License](https://img.shields.io/crates/l/bevy_ui_anchor)](https://opensource.org/licenses/MIT)
 
-```
+```rust
 use bevy::prelude::*;
 use bevy_ui_anchor::{RotateTowardsPlugin, RotateTo, UpDirection};
 
