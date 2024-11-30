@@ -11,7 +11,7 @@ A Bevy Plugin and library to help with rotating an entity towards a target even 
 
 ## Features
 
-- Rotates an entity towards another in the world continusly.
+- Updates an entities rotation in the world towards another entity or target
 
 | Bevy version | Crate version |
 | ------------ | ------------- |
