@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-#[derive(Component)]
+#[derive(Clone, Component, Debug, Reflect)]
+#[reflect(Component, Debug)]
 /// When this component is added on an entity, [`Transform::forward()`] direction points towards the selected
 /// entity
 pub struct RotateTo {
@@ -10,6 +11,8 @@ pub struct RotateTo {
     pub updir: UpDirection,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Reflect)]
+#[reflect(Debug, PartialEq)]
 /// The rotated entity will try to have its [`Transform::up()`] direction matching this selection
 pub enum UpDirection {
     /// Will synchronize the direction of UP towards the UP direction of the target
@@ -30,6 +33,8 @@ pub struct RotateTowardsPlugin;
 
 impl Plugin for RotateTowardsPlugin {
     fn build(&self, app: &mut App) {
+        app.register_type::<RotateTo>();
+
         app.add_systems(
             PostUpdate,
             rotate_towards.before(TransformSystem::TransformPropagate),
