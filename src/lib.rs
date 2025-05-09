@@ -68,7 +68,10 @@ fn rotate_towards(
 
         let rotation = calculate_local_rotation_to_target(rotator_gt, target_gt, parent_gt, updir);
 
-        rotator_t.rotation = rotation;
+        const EPSILON: f32 = 1e-6;
+        if !rotation.abs_diff_eq(rotator_t.rotation, EPSILON) {
+            rotator_t.rotation = rotation;
+        }
     }
 }
 
