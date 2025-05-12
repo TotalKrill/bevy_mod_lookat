@@ -53,7 +53,6 @@ fn rotate_towards(
 ) {
     for (mut rotator_t, rotator_gt, child_of, target) in rotators.iter_mut() {
         let Ok(target_gt) = global_transforms.get(target.entity) else {
-            bevy::log::error!("Entity used as target was not found: {}", target.entity);
             continue;
         };
 
