@@ -27,22 +27,52 @@ pub enum UpDirection {
     Dir(Dir3),
 }
 
-/// Plugin that constantly rotates entities towards a selected target when they have the [`RotateTo`] component on them
-/// if you only want the math for calculating the local rotation needed to look at a target, see [`calculate_local_rotation_to_target`]
-pub struct RotateTowardsPlugin;
+/// Plugin that constantly rotates entities towards a selected target when they have the [`RotateTo`]
+/// component on them.
+///
+/// If you only want the math for calculating the local rotation needed to look at a target,
+/// see the function [`calculate_local_rotation_to_target`]
+pub struct RotateTowardsPlugin {
+    /// determines if the plugins shall
+    /// calculate new global transforms before trying to change rotation to match the target
+    /// This can have a negative effect on performance, but helps combat the rotation lagging behind
+    calculate_new_globals: bool,
+}
+
+impl Default for RotateTowardsPlugin {
+    fn default() -> Self {
+        Self::new(true)
+    }
+}
+
+impl RotateTowardsPlugin {
+    pub fn new(calculate_new_globals: bool) -> Self {
+        Self {
+            calculate_new_globals,
+        }
+    }
+}
 
 impl Plugin for RotateTowardsPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<RotateTo>();
-
-        app.add_systems(
-            PostUpdate,
-            rotate_towards.before(TransformSystem::TransformPropagate),
-        );
+        if self.calculate_new_globals {
+            app.add_systems(
+                PostUpdate,
+                rotate_towards_with_updated_global_transforms
+                    .before(TransformSystem::TransformPropagate),
+            );
+        } else {
+            app.add_systems(
+                PostUpdate,
+                rotate_towards_without_updating_global_transforms
+                    .before(TransformSystem::TransformPropagate),
+            );
+        }
     }
 }
 
-fn rotate_towards(
+fn rotate_towards_without_updating_global_transforms(
     global_transforms: Query<&GlobalTransform>, // potential_targets
     mut rotators: Query<(
         &mut Transform,
@@ -81,7 +111,65 @@ fn rotate_towards(
     }
 }
 
-/// Calculates the local rotation on a rotator towards a target, adjusting for rotations of eventual parents, with the selected rotator up direction.
+fn rotate_towards_with_updated_global_transforms(
+    mut commands: Commands,
+    mut rotators: Query<(
+        Entity,
+        &Transform, // cant have mut access here, will conflict with TransformHelper
+        Option<&ChildOf>,
+        &RotateTo,
+    )>, // the ones to rotate
+    trans_helper: TransformHelper,
+) {
+    for (rotator_e, rotator_t, child_of, target) in rotators.iter_mut() {
+        let Ok(target_gt) = trans_helper.compute_global_transform(target.entity) else {
+            continue;
+        };
+
+        let parent_gt = if let Some(child_of) = child_of {
+            trans_helper
+                .compute_global_transform(child_of.parent())
+                .ok()
+        } else {
+            None
+        };
+
+        let updir = match target.updir {
+            UpDirection::Target => target_gt.up(),
+            UpDirection::Dir(dir) => dir,
+            UpDirection::Parent => {
+                if let Some(parent_gt) = parent_gt {
+                    parent_gt.up()
+                } else {
+                    // if there is no parent, fallback to bevy up direction
+                    Dir3::Y
+                }
+            }
+        };
+
+        let Ok(rotator_gt) = trans_helper.compute_global_transform(rotator_e) else {
+            continue;
+        };
+
+        let rotation =
+            calculate_local_rotation_to_target(&rotator_gt, &target_gt, parent_gt.as_ref(), updir);
+
+        // workaround since if we have a mutable access to Transforms in the rotators query,
+        // we will create a Query Conflict panic
+        let mut new_rotator_t = rotator_t.clone();
+        new_rotator_t.rotation = rotation;
+
+        let Ok(mut ec) = commands.get_entity(rotator_e) else {
+            continue;
+        };
+
+        ec.insert(new_rotator_t);
+    }
+}
+
+/// Calculates the local rotation on a rotator towards a target,
+/// adjusting for rotations of eventual parents,
+/// with the selected rotator up direction.
 pub fn calculate_local_rotation_to_target(
     rotator_gt: &GlobalTransform,
     target_gt: &GlobalTransform,
