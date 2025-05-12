@@ -44,16 +44,21 @@ impl Plugin for RotateTowardsPlugin {
 
 fn rotate_towards(
     global_transforms: Query<&GlobalTransform>, // potential_targets
-    mut rotators: Query<(&mut Transform, &GlobalTransform, Option<&Parent>, &RotateTo)>, // the ones to rotate
+    mut rotators: Query<(
+        &mut Transform,
+        &GlobalTransform,
+        Option<&ChildOf>,
+        &RotateTo,
+    )>, // the ones to rotate
 ) {
-    for (mut rotator_t, rotator_gt, parent, target) in rotators.iter_mut() {
+    for (mut rotator_t, rotator_gt, child_of, target) in rotators.iter_mut() {
         let Ok(target_gt) = global_transforms.get(target.entity) else {
             bevy::log::error!("Entity used as target was not found: {}", target.entity);
             continue;
         };
 
-        let parent_gt = if let Some(parent_e) = parent {
-            global_transforms.get(parent_e.get()).ok()
+        let parent_gt = if let Some(child_of) = child_of {
+            global_transforms.get(child_of.parent()).ok()
         } else {
             None
         };

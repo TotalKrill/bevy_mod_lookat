@@ -1,16 +1,16 @@
 [package]
 name = "bevy_mod_lookat"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 description = "A microplugin for Bevy, that allows adding a component to an entity, that makes it target either an entity, or a position"
-author = "Kristoffer Ödmark <kristoffer.odmark90@gmail.com>"
+authors = ["Kristoffer Ödmark <kristoffer.odmark90@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/TotalKrill/bevy_mod_lookat.git"
 readme = "README.md"
 
 [dependencies]
-bevy = {version = "0.15.0", default-features = false}
+bevy = { version = "0.16.0", default-features = false }
 
 [dev-dependencies.bevy]
-version = "0.15.0"
+version = "0.16.0"
 features = ["dynamic_linking"]
