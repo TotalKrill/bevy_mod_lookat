@@ -1,6 +1,6 @@
 [package]
 name = "bevy_mod_lookat"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 description = "A microplugin for Bevy, that allows adding a component to an entity, that makes it target either an entity, or a position"
 authors = ["Kristoffer Ödmark <kristoffer.odmark90@gmail.com>"]
