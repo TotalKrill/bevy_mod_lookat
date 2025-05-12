@@ -15,6 +15,7 @@ A Bevy Plugin and library to help with rotating an entity towards a target even 
 
 | Bevy version | Crate version |
 | ------------ | ------------- |
+| 0.16         | 0.3-0.4       |
 | 0.15         | 0.2           |
 | 0.14         | 0.1           |
 
@@ -22,17 +23,19 @@ A Bevy Plugin and library to help with rotating an entity towards a target even 
 
 ``` rust
 //! A simple 3D scene with light shining over a cube sitting on a plane.
-#![feature(test)]
-extern crate test;
 use bevy::{color::palettes::css::*, prelude::*, render::primitives::Aabb};
 use bevy_mod_lookat::*;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(RotateTowardsPlugin)
+        .add_plugins(RotateTowardsPlugin::default())
         .add_systems(Startup, setup)
-        .add_systems(Update, (mover, rotate, draw_axes, draw_forward))
+        .add_systems(Update, (mover, rotate).chain())
+        .add_systems(
+            PostUpdate,
+            (draw_axes, draw_forward).after(TransformSystem::TransformPropagate),
+        )
         .run();
 }
 
@@ -73,12 +76,14 @@ fn rotate(mut query: Query<&mut Transform, With<Rotate>>, time: Res<Time>) {
         transform.rotate_x(time.delta_secs());
     }
 }
+const SPEED: f32 = 1.0;
 fn mover(time: Res<Time>, mut ents: Query<&mut Transform, With<Move>>) {
     let distance = 2.0;
     for mut ent in ents.iter_mut() {
-        ent.translation.x = distance * f32::sin(time.elapsed().as_secs_f32());
-        ent.translation.z = distance * f32::cos(time.elapsed().as_secs_f32());
-        ent.translation.y = 1.5 + 0.5 * distance * f32::cos(3.0 * time.elapsed().as_secs_f32());
+        ent.translation.x = distance * f32::sin(SPEED * time.elapsed().as_secs_f32());
+        ent.translation.z = distance * f32::cos(SPEED * time.elapsed().as_secs_f32());
+        ent.translation.y =
+            1.5 + 0.5 * distance * f32::cos(SPEED * 3.0 * time.elapsed().as_secs_f32());
     }
 }
 /// set up a simple 3D scene
@@ -96,8 +101,8 @@ fn setup(
 
     let target_id = commands
         .spawn((
-            Mesh3d(meshes.add(Cuboid::new(0.2, 0.2, 0.2))),
-            MeshMaterial3d(materials.add(Color::from(DARK_RED))),
+            Mesh3d(meshes.add(Cuboid::new(0.05, 0.05, 0.05))),
+            MeshMaterial3d(materials.add(Color::from(CRIMSON))),
             Transform::from_xyz(1.0, 0.5, 1.0),
             Move,
             Rotate,
