@@ -3,20 +3,27 @@ use bevy::prelude::*;
 #[derive(Clone, Component, Debug, Reflect)]
 #[reflect(Component, Debug)]
 /// When this component is added on an entity, [`Transform::forward()`] direction points towards the selected
-/// entity
+/// entity always
+#[relationship(relationship_target = RotatedToBy)]
 pub struct RotateTo {
     /// entity to target, the Targeted entity must have a [`GlobalTransform`]
+    #[relationship]
     pub entity: Entity,
     /// The rotated entity will match its [`Transform::up()`] according to this
     pub updir: UpDirection,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Reflect)]
+#[derive(Component, Debug, Reflect)]
+#[relationship_target(relationship = RotateTo)]
+pub struct RotatedToBy(Vec<Entity>);
+
+#[derive(Clone, Copy, Debug, PartialEq, Reflect, Default)]
 #[reflect(Debug, PartialEq)]
 /// The rotated entity will try to have its [`Transform::up()`] direction matching this selection
 pub enum UpDirection {
     /// Will synchronize the direction of UP towards the UP direction of the target
     /// Useful when rotating towards the camera and wanting the direction to be up for example
+    #[default]
     Target,
     /// Keeps the up-direction the same as for the parent of this entity
     /// useful when you want it rotated in relation to what this entity is attached to
@@ -56,6 +63,7 @@ impl RotateTowardsPlugin {
 impl Plugin for RotateTowardsPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<RotateTo>();
+        app.register_type::<RotatedToBy>();
         if self.calculate_new_globals {
             app.add_systems(
                 PostUpdate,
