@@ -1,5 +1,5 @@
 //! A simple 3D scene with light shining over a cube sitting on a plane.
-use bevy::{color::palettes::css::*, prelude::*, render::primitives::Aabb};
+use bevy::{camera::primitives::Aabb, color::palettes::css::*, prelude::*};
 use bevy_mod_lookat::*;
 
 fn main() {
@@ -10,7 +10,7 @@ fn main() {
         .add_systems(Update, (mover, rotate).chain())
         .add_systems(
             PostUpdate,
-            (draw_axes, draw_forward).after(TransformSystem::TransformPropagate),
+            (draw_axes, draw_forward).after(TransformSystems::Propagate),
         )
         .run();
 }

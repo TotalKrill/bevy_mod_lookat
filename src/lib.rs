@@ -67,14 +67,13 @@ impl Plugin for RotateTowardsPlugin {
         if self.calculate_new_globals {
             app.add_systems(
                 PostUpdate,
-                rotate_towards_with_updated_global_transforms
-                    .before(TransformSystem::TransformPropagate),
+                rotate_towards_with_updated_global_transforms.before(TransformSystems::Propagate),
             );
         } else {
             app.add_systems(
                 PostUpdate,
                 rotate_towards_without_updating_global_transforms
-                    .before(TransformSystem::TransformPropagate),
+                    .before(TransformSystems::Propagate),
             );
         }
     }
@@ -164,7 +163,7 @@ fn rotate_towards_with_updated_global_transforms(
 
         // workaround since if we have a mutable access to Transforms in the rotators query,
         // we will create a Query Conflict panic
-        let mut new_rotator_t = rotator_t.clone();
+        let mut new_rotator_t = *rotator_t;
         new_rotator_t.rotation = rotation;
 
         let Ok(mut ec) = commands.get_entity(rotator_e) else {
