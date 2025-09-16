@@ -15,15 +15,16 @@ A Bevy Plugin and library to help with rotating an entity towards a target even 
 
 | Bevy version | Crate version |
 | ------------ | ------------- |
+| 0.17         | 0.5           |
 | 0.16         | 0.3-0.4       |
 | 0.15         | 0.2           |
 | 0.14         | 0.1           |
 
 ## Example
 
-``` rust
+```rust
 //! A simple 3D scene with light shining over a cube sitting on a plane.
-use bevy::{color::palettes::css::*, prelude::*, render::primitives::Aabb};
+use bevy::{camera::primitives::Aabb, color::palettes::css::*, prelude::*};
 use bevy_mod_lookat::*;
 
 fn main() {
@@ -34,7 +35,7 @@ fn main() {
         .add_systems(Update, (mover, rotate).chain())
         .add_systems(
             PostUpdate,
-            (draw_axes, draw_forward).after(TransformSystem::TransformPropagate),
+            (draw_axes, draw_forward).after(TransformSystems::Propagate),
         )
         .run();
 }
