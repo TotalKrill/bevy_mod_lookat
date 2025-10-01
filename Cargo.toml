@@ -9,8 +9,8 @@ repository = "https://github.com/TotalKrill/bevy_mod_lookat.git"
 readme = "README.md"
 
 [dependencies]
-bevy = { version = "0.17.0-rc", default-features = false }
+bevy = { version = "0.17", default-features = false }
 
 [dev-dependencies.bevy]
-version = "0.17.0-rc"
+version = "0.17"
 features = ["dynamic_linking"]
