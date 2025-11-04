@@ -170,7 +170,7 @@ fn rotate_towards_with_updated_global_transforms(
             continue;
         };
 
-        ec.insert(new_rotator_t);
+        ec.try_insert(new_rotator_t);
     }
 }
 
