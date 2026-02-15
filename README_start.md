@@ -15,6 +15,7 @@ A Bevy Plugin and library to help with rotating an entity towards a target even 
 
 | Bevy version | Crate version |
 | ------------ | ------------- |
+| 0.18         | 0.6           |
 | 0.17         | 0.5           |
 | 0.16         | 0.3-0.4       |
 | 0.15         | 0.2           |
