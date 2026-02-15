@@ -66,8 +66,6 @@ impl RotateTowardsPlugin {
 
 impl Plugin for RotateTowardsPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<RotateTo>();
-        app.register_type::<RotatedToBy>();
         if self.calculate_new_globals {
             app.add_systems(
                 PostUpdate,

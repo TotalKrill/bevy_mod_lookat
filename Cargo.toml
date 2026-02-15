@@ -8,10 +8,17 @@ license = "MIT"
 repository = "https://github.com/TotalKrill/bevy_mod_lookat.git"
 readme = "README.md"
 
+
+[features]
+default = ["bevy_std", "bevy-support"]
+
+bevy_std = ["bevy_math/std"]
+bevy-support = ["bevy_transform/bevy-support"]
+
 [dependencies]
 bevy_app = { version = "0.18", default-features = false }
-bevy_ecs = { version = "0.18", default-features = false }
-bevy_math = { version = "0.18", default-features = false }
+bevy_ecs = { version = "0.18", default-features = false, features = ["bevy_reflect"] }
+bevy_math = { version = "0.18", default-features = false, features = ["bevy_reflect"] }
 bevy_reflect = { version = "0.18", default-features = false }
 bevy_transform = { version = "0.18", default-features = false }
 
